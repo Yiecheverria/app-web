@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.distribuida.web'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+ext {
+    mainClass = 'com.distribuida.web.Main'
+}
+
+dependencies {
+    implementation 'com.sparkjava:spark-core:2.9.3'
+    implementation 'org.thymeleaf:thymeleaf:3.0.11.RELEASE'
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    implementation 'org.slf4j:slf4j-simple:1.7.30'
+    implementation 'javax.enterprise:cdi-api:2.0.SP1'
+    implementation 'org.jboss.weld.se:weld-se-core:3.1.5.Final'
+}
+
+task copyLibs(type: Copy) {
+    from configurations.runtimeClasspath
+    into 'build/libs/libs'
+}
+
+copyLibs.dependsOn jar
+assemble.dependsOn copyLibs
+
+jar {
+    archiveFileName = "${project.name}.jar"
+    manifest {
+        attributes('Main-Class': "${project.mainClass}",
+                'Class-Path': configurations.runtimeClasspath.files.collect { "libs/$it.name" }.join(' ')
+        )
+    }
+}
